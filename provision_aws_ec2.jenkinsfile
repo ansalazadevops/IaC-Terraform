@@ -1,0 +1,38 @@
+pipeline {
+
+    agent { label 'alpine_controller' }
+
+    environment {
+        AWS_DEFAULT_REGION='us-east-1'
+    }
+
+    options { skipDefaultCheckout(true) }
+  
+    stages {
+
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('provision') {
+            steps {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ansalaza_aws_app_user', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh 'terraform init'
+                    sh 'terraform plan'
+                    sh 'terraform apply --auto-approve'
+                }
+            }
+        }
+
+    }
+
+    post { always { cleanWs() } }    
+}
