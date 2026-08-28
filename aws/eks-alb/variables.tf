@@ -16,19 +16,25 @@ variable "project" {
   type = string
 }
 
-variable "region" {
+variable "aws_region" {
   default     = "us-east-1"
-  description = "VPC default Region"
+  description = "AWS region"
+  type        = string
+}
+
+variable "cluster_name" {
+  default     = "eks-cluster"
+  description = "EKS Cluster Name"
   type        = string
 }
 
 # -------------------------------------
 # Networking Variables
 # -------------------------------------
-variable "vpc-cidr" {
-    default     = "10.0.0.0/16"
+variable "vpc_cidr" {
+  default       = "10.0.0.0/16"
     description = "VPC CIDR Block"
-    type        = string 
+  type          = string
 }
 
 variable "availability-zone-1" {
