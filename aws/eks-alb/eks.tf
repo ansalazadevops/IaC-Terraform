@@ -9,9 +9,10 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   cluster_endpoint_public_access = true
+  enable_irsa                    = true
 
-  # Enable OIDC provider for IRSA (IAM Roles for Service Accounts)
-  enable_irsa = true
+  # Grants the IAM role running Terraform full cluster admin rights
+  enable_cluster_creator_admin_permissions = true
 
   eks_managed_node_groups = {
     main = {

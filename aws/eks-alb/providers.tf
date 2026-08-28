@@ -18,30 +18,29 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  default_tags {
-      tags = {
-          Environment = "${var.environment}"
-          Owner       = "${var.owner}"
-          Project     = "${var.project}"
-      }
-  }
 }
 
-# Fetch dynamic auth details from EKS
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_name
+# Dynamic exec authentication to prevent token expiration
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region]
+  }
 }
 
 provider "helm" {
   kubernetes {
-    host                    = module.eks.cluster_endpoint
-    cluster_ca_certificate  = base64decode(module.eks.cluster_certificate_authority_data)
-    token                   = data.aws_eks_cluster_auth.cluster.token
-  }
-}
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
-provider "kubernetes" {
-  host                    = module.eks.cluster_endpoint
-  cluster_ca_certificate  = base64decode(module.eks.cluster_certificate_authority_data)
-  token                   = data.aws_eks_cluster_auth.cluster.token
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region]
+    }
+  }
 }
