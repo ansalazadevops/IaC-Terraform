@@ -2,6 +2,7 @@
 .vscode
 .terraform/
 .terraform.lock.hcl
+.test
 *.tfstate
 *.tfstate.*
 backup/
